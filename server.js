@@ -1,9 +1,12 @@
-const express = require('express');
+import express from 'express';
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
+const __dirname = dirname(fileURLToPath(import.meta.url));
 const app = express();
-const {readFile} = require('fs').promises;
 
+app.use(express.static(join(__dirname, 'dist')));
 
-app.use(express.static(__dirname + '/public')); 
-
-app.listen(process.env.PORT || 3000, () => console.log(`It be at http://localhost:3000`))
+app.listen(process.env.PORT || 3000, () => {
+  console.log(`Melodist running at http://localhost:${process.env.PORT || 3000}`);
+});

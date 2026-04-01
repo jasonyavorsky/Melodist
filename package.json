@@ -1,28 +1,30 @@
 {
-  "name": "mel",
-  "version": "1.0.0",
-  "description": "",
+  "name": "melodist",
+  "version": "2.0.0",
+  "description": "Random melody generator with sheet music notation and audio playback",
+  "type": "module",
   "main": "server.js",
   "scripts": {
-    "start": "node ."
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "start": "node server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": ["melody", "generator", "music", "midi", "vexflow"],
+  "author": "Michael Win, Timothy Lam",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
   "dependencies": {
-    "browserify-fs": "^1.0.0",
-    "express": "^4.17.1",
-    "midi-writer-js": "^1.7.4",
-    "midicube": "^0.6.1",
-    "node-vexflow": "^0.1.2",
-    "react-vexflow": "0.0.4",
-    "requirejs": "^2.3.6",
-    "uniq": "^1.0.1",
-    "vexflow": "^3.0.9"
+    "express": "^4.22.1",
+    "midi-writer-js": "^3.2.1",
+    "tone": "^15.1.22",
+    "vexflow": "^5.0.0"
   },
   "devDependencies": {
-    "prop-types": "^15.7.2",
-    "react": "^15.6.2",
-    "react-dom": "^15.6.2"
+    "@tailwindcss/vite": "^4.2.2",
+    "tailwindcss": "^4.2.2",
+    "vite": "^8.0.3"
   }
 }

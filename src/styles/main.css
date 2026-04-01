@@ -1,0 +1,86 @@
+@import "tailwindcss";
+
+/* Custom range slider styling */
+input[type="range"] {
+  @apply w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  @apply appearance-none w-4 h-4 rounded-full bg-indigo-600 cursor-pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  @apply w-4 h-4 rounded-full bg-indigo-600 cursor-pointer border-0;
+}
+
+/* Toggle switch */
+.toggle-group {
+  @apply inline-flex items-center gap-2 cursor-pointer;
+}
+
+.toggle-track {
+  @apply relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 shrink-0;
+}
+
+.toggle-group input {
+  @apply sr-only;
+}
+
+.toggle-track .toggle-dot {
+  @apply inline-block h-4 w-4 rounded-full bg-white transition-transform duration-200;
+  transform: translateX(2px);
+}
+
+.toggle-group input:checked ~ .toggle-track .toggle-dot {
+  transform: translateX(22px);
+}
+
+.toggle-group input:checked ~ .toggle-track {
+  @apply bg-indigo-600;
+}
+
+.toggle-group input:not(:checked) ~ .toggle-track {
+  @apply bg-slate-300;
+}
+
+/* Toast notification */
+.toast {
+  @apply fixed bottom-6 left-1/2 -translate-x-1/2 px-6 py-3 bg-slate-900 text-white rounded-lg shadow-lg text-sm z-50;
+  animation: toast-in 0.3s ease, toast-out 0.3s ease forwards;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+
+@keyframes toast-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+
+/* Note highlight during playback */
+.vf-note-highlight .vf-stavenote .vf-notehead path,
+.vf-note-highlight .vf-stavenote .vf-stem path {
+  fill: #4f46e5;
+  stroke: #4f46e5;
+}
+
+/* VexFlow container */
+#notation-container svg {
+  @apply max-w-full;
+}
+
+/* History panel */
+.history-item {
+  @apply px-3 py-2 rounded-lg hover:bg-slate-100 cursor-pointer transition-colors text-sm text-slate-600 border border-transparent hover:border-slate-200;
+}
+
+.history-item.active {
+  @apply bg-indigo-50 border-indigo-200 text-indigo-700;
+}
+
+/* Keyboard shortcut hints */
+.kbd {
+  @apply inline-flex items-center justify-center px-1.5 py-0.5 text-xs font-mono bg-slate-100 border border-slate-300 rounded text-slate-500;
+}
