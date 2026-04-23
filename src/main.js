@@ -1,5 +1,5 @@
 import './styles/main.css';
-import { INTERVALS, NOTES, DEFAULTS } from './music-theory.js';
+import { INTERVALS, NOTES, DEFAULTS, getKeySignature } from './music-theory.js';
 import { generateMelody } from './melody-generator.js';
 import { buildCadenceChords } from './cadence.js';
 import { playMelody, stopPlayback, onNotePlayed, getIsPlaying, setMetronome } from './audio.js';
@@ -213,7 +213,7 @@ function handleRandomize() {
   const placeholder = document.getElementById('notation-placeholder');
   if (placeholder) placeholder.style.display = 'none';
 
-  drawNotes(currentMelody.vexflowNotes, state.measureCount, state.timeSig);
+  drawNotes(currentMelody.vexflowNotes, state.measureCount, state.timeSig, getKeySignature(state.key, state.scale));
 
   // Save to history
   saveToHistory({
@@ -293,7 +293,7 @@ function loadFromHistory(entry) {
   document.getElementById('metronome-toggle').checked = state.metronomeOn ?? false;
   setMetronome(state.metronomeOn ?? false);
 
-  drawNotes(currentMelody.vexflowNotes, state.measureCount, state.timeSig);
+  drawNotes(currentMelody.vexflowNotes, state.measureCount, state.timeSig, getKeySignature(state.key, state.scale));
   saveSettings();
   showToast('Melody loaded from history');
 }

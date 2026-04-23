@@ -125,6 +125,39 @@ export function durationToMIDI(duration) {
   return "4";
 }
 
+// Semitones to subtract from scale root to get the parent major key root.
+// Modes: each mode sits n semitones above the major tonic.
+const SCALE_PARENT_MAJOR_OFFSET = {
+  "Major":          0,
+  "Natural Minor":  9,  // Aeolian = 6th mode
+  "Harmonic Minor": 9,  // Same key sig as natural minor; raised 7th is an accidental
+  "Dorian":         2,
+  "Lydian":         5,
+  "Mixolydian":     7,
+  "Phrygian":       4,
+  "Locrian":        11,
+  "Pentatonic Major": 0,
+  "Blues":          9,  // Use the minor key signature
+  "Whole Tone":     0,
+  "Chromatic":      0,
+};
+
+// Conventional major key name for each chromatic index (0 = C).
+// Chooses the enharmonically simpler spelling (max 6 sharps / 5 flats).
+const MAJOR_KEY_NAMES = ["C", "Db", "D", "Eb", "E", "F", "F#", "G", "Ab", "A", "Bb", "B"];
+
+/**
+ * Return the VexFlow key-signature string for the given key + scale,
+ * e.g. "G" (1 sharp) for G major or E minor, "Bb" (2 flats) for Bb major or G minor.
+ */
+export function getKeySignature(key, scale) {
+  const keyIndex = NOTES.indexOf(key);
+  if (keyIndex === -1) return "C";
+  const offset = SCALE_PARENT_MAJOR_OFFSET[scale] ?? 0;
+  const parentIndex = ((keyIndex - offset) % 12 + 12) % 12;
+  return MAJOR_KEY_NAMES[parentIndex];
+}
+
 /**
  * Get the number of beats in a measure for the given time signature.
  */

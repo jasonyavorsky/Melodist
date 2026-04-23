@@ -9,7 +9,7 @@ Forked from [mwin96/Melodist](https://github.com/mwin96/Melodist).
 - Generate melodies in 12 keys and 12 scales (all 7 modes of the major scale, plus Natural Minor, Harmonic Minor, Pentatonic Major, Blues, Whole Tone, and Chromatic)
 - Logical Mode — stepwise melody generation with directional momentum and phrase-ending tonic resolution, for more natural-sounding results
 - Intro cadence — optionally plays a II–V–I or IV–V–I chord progression before the melody at the selected key, scale, BPM, and time signature
-- Real-time sheet music rendering with VexFlow
+- Real-time sheet music rendering with correct key signature and accidentals (VexFlow)
 - Audio playback with piano samples via Tone.js
 - MIDI file export
 - Playback visualization (highlights current note)

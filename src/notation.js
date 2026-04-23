@@ -11,6 +11,16 @@ const STAVE_Y_START = 40;
 const LINE_HEIGHT = 105;
 const MEASURES_PER_LINE = 2;
 
+// Sharp count for each major key name (negative = flats).
+const KEY_SIG_SHARPS = {
+  "C": 0,
+  "G": 1, "D": 2, "A": 3, "E": 4, "B": 5, "F#": 6, "C#": 7,
+  "F": -1, "Bb": -2, "Eb": -3, "Ab": -4, "Db": -5, "Gb": -6, "Cb": -7,
+};
+
+// Enharmonic respelling for keys that use flats (VexFlow lowercase names).
+const SHARP_TO_FLAT = { "c#": "db", "d#": "eb", "f#": "gb", "g#": "ab", "a#": "bb" };
+
 /**
  * Initialize the VexFlow renderer on the given container element.
  */
@@ -34,10 +44,10 @@ function resizeCanvas(measureCount) {
  * Draw the melody notation on the staff.
  * @param {Array} notes - Array of { note, octave, duration, isRest }
  * @param {number} measureCount
- * @param {string} timeSig - Time signature string (e.g., "4/4")
- * @returns {Array} noteElements - SVG elements for each note (for highlighting)
+ * @param {string} timeSig - e.g. "4/4"
+ * @param {string} keySig  - VexFlow major key name, e.g. "G", "Bb". Defaults to "C".
  */
-export function drawNotes(notes, measureCount, timeSig = "4/4") {
+export function drawNotes(notes, measureCount, timeSig = "4/4", keySig = "C") {
   if (!renderer) return [];
 
   resizeCanvas(measureCount);
@@ -46,6 +56,11 @@ export function drawNotes(notes, measureCount, timeSig = "4/4") {
   context.setFont('Arial', 10);
 
   noteElements = [];
+
+  const sharps = KEY_SIG_SHARPS[keySig] ?? 0;
+  const useFlats = sharps < 0;
+  // Approximate pixel width of the key signature symbols.
+  const keySigWidth = Math.abs(sharps) * 12;
 
   // Group notes into measures
   const beatsPerMeasure = timeSig === "6/8" ? 3 : parseInt(timeSig.split("/")[0]);
@@ -71,60 +86,58 @@ export function drawNotes(notes, measureCount, timeSig = "4/4") {
   measures.forEach((measure, measureIndex) => {
     const line = Math.floor(measureIndex / MEASURES_PER_LINE);
     const posInLine = measureIndex % MEASURES_PER_LINE;
+    const isFirstInLine = measureIndex === 0 || posInLine === 0;
 
     let x, y;
     if (measureIndex === 0) {
       x = STAVE_X_START;
       y = STAVE_Y_START;
     } else {
-      // First stave in a line is wider to account for the clef on the first stave
       x = posInLine === 0 ? STAVE_X_START : STAVE_X_START + STAVE_WIDTH + 15;
       y = STAVE_Y_START + line * LINE_HEIGHT;
     }
 
     const stave = new Stave(x, y, STAVE_WIDTH);
     if (measureIndex === 0) {
-      stave.addClef('treble').addTimeSignature(timeSig);
+      stave.addClef('treble').addKeySignature(keySig).addTimeSignature(timeSig);
+    } else if (isFirstInLine) {
+      // Show key sig at the start of each new line (standard notation practice)
+      stave.addKeySignature(keySig);
     }
     stave.setContext(context).draw();
 
-    // Create VexFlow notes
+    // Create VexFlow notes, respelling accidentals to match the key's convention
     const vfNotes = measure.map((n) => {
       const durText = durationToVexflow(n.duration);
 
       if (n.isRest) {
-        return new StaveNote({
-          keys: ['b/4'],
-          duration: durText + 'r',
-        });
+        return new StaveNote({ keys: ['b/4'], duration: durText + 'r' });
       }
 
-      const key = `${n.note}/${n.octave}`;
-      const staveNote = new StaveNote({
-        keys: [key],
-        duration: durText,
-      });
-
-      // Add accidental if note has a sharp
-      if (n.note.length > 1 && n.note.includes('#')) {
-        staveNote.addModifier(new Accidental('#'), 0);
-      }
-
-      return staveNote;
+      // n.note is already lowercase (e.g. "c#", "d"). Respell if key uses flats.
+      const spelling = useFlats ? (SHARP_TO_FLAT[n.note] ?? n.note) : n.note;
+      return new StaveNote({ keys: [`${spelling}/${n.octave}`], duration: durText });
     });
 
-    // Create voice and format
+    // Create voice
     const voice = new Voice({ numBeats: beatsPerMeasure, beatValue: timeSig === "6/8" ? 8 : 4 })
       .setMode(Voice.Mode.SOFT)
       .addTickables(vfNotes);
 
-    // Give the formatter less width for the first measure (clef + time sig take space)
-    // and leave padding so notes don't touch the barline
-    const formatWidth = measureIndex === 0 ? STAVE_WIDTH - 120 : STAVE_WIDTH - 60;
+    // Let VexFlow compute which accidentals to show given the key signature.
+    // This handles sharps, flats, naturals (e.g. raised 7th in harmonic minor),
+    // and courtesy accidentals automatically.
+    Accidental.applyAccidentals([voice], keySig);
+
+    // Formatter width: shrink by key-sig symbol space on staves that show one.
+    const keySigOffset = isFirstInLine ? keySigWidth : 0;
+    const formatWidth = measureIndex === 0
+      ? STAVE_WIDTH - 120 - keySigOffset
+      : STAVE_WIDTH - 60 - keySigOffset;
+
     new Formatter().joinVoices([voice]).format([voice], formatWidth);
     voice.draw(context, stave);
 
-    // Store note SVG elements for playback highlighting
     vfNotes.forEach((vfNote) => {
       noteElements.push({
         element: vfNote.getSVGElement(),
