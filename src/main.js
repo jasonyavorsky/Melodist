@@ -22,6 +22,7 @@ let state = {
   octaveMin: 4,
   octaveMax: 5,
   timeSig: "4/4",
+  logicalMode: false,
 };
 
 let currentMelody = null;
@@ -95,6 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initToggle('sixteenth-toggle', (v) => { state.sixteenthOn = v; });
   initToggle('rests-toggle', (v) => { state.restsOn = v; });
   initToggle('metronome-toggle', (v) => { setMetronome(v); });
+  initToggle('logical-toggle', (v) => { state.logicalMode = v; });
 
   // Playback visualization
   onNotePlayed((index) => { highlightNote(index); });
@@ -163,6 +165,7 @@ function handleRandomize() {
     octaveMin: state.octaveMin,
     octaveMax: state.octaveMax,
     timeSig: state.timeSig,
+    logical: state.logicalMode,
   });
 
   if (!currentMelody) {
@@ -244,6 +247,7 @@ function loadFromHistory(entry) {
   document.getElementById('eighth-toggle').checked = state.eighthOn;
   document.getElementById('sixteenth-toggle').checked = state.sixteenthOn;
   document.getElementById('rests-toggle').checked = state.restsOn;
+  document.getElementById('logical-toggle').checked = state.logicalMode ?? false;
 
   drawNotes(currentMelody.vexflowNotes, state.measureCount, state.timeSig);
   showToast('Melody loaded from history');
