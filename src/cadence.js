@@ -15,8 +15,10 @@ const SCALE_CHORD_QUALITIES = {
   'Natural Minor':  ['minor', 'diminished', 'major', 'minor', 'minor', 'major', 'major'],
   'Harmonic Minor': ['minor', 'diminished', 'augmented', 'minor', 'dominant7', 'major', 'diminished'],
   'Dorian':         ['minor', 'minor', 'major', 'major', 'minor', 'diminished', 'major'],
+  'Lydian':         ['major', 'major', 'minor', 'diminished', 'major', 'minor', 'minor'],
   'Mixolydian':     ['major', 'minor', 'diminished', 'major', 'minor', 'minor', 'major'],
   'Phrygian':       ['minor', 'major', 'major', 'minor', 'diminished', 'major', 'minor'],
+  'Locrian':        ['diminished', 'major', 'minor', 'minor', 'diminished', 'major', 'minor'],
 };
 
 // For non-heptatonic scales, derive I/IV/V quality from overall character
@@ -79,7 +81,7 @@ export function buildCadenceChords(key, scale, cadenceType) {
   };
 
   // Degree indices: II=1, IV=3, V=4, I=0 (all 0-based)
-  const progression = cadenceType === '2-5-1' ? [1, 4, 0] : [0, 3, 4];
+  const progression = cadenceType === '2-5-1' ? [1, 4, 0] : [3, 4, 0];
   const baseOctave = 3;
 
   return progression.map(degIdx => {

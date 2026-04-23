@@ -4,8 +4,10 @@ export const INTERVALS = {
   "Harmonic Minor": [2, 1, 2, 2, 1, 3, 1],
   "Pentatonic Major": [2, 2, 3, 2],
   "Dorian": [2, 1, 2, 2, 2, 1, 2],
+  "Lydian": [2, 2, 2, 1, 2, 2, 1],
   "Mixolydian": [2, 2, 1, 2, 2, 1, 2],
   "Phrygian": [1, 2, 2, 2, 1, 2, 2],
+  "Locrian": [1, 2, 2, 1, 2, 2, 2],
   "Blues": [3, 2, 1, 1, 3, 2],
   "Whole Tone": [2, 2, 2, 2, 2, 2],
   "Chromatic": [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -14,7 +16,7 @@ export const INTERVALS = {
 export const NOTES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"];
 
 export const DEFAULTS = {
-  bpm: 130,
+  bpm: 65,
   measures: 2,
   minMeasures: 2,
   maxMeasures: 28,

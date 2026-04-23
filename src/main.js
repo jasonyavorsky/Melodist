@@ -10,7 +10,20 @@ import {
   saveToHistory, getHistory,
 } from './ui.js';
 
-// --- State ---
+// --- Settings persistence ---
+const SETTINGS_KEY = 'melodist-settings';
+
+function saveSettings() {
+  localStorage.setItem(SETTINGS_KEY, JSON.stringify(state));
+}
+
+function loadSettings() {
+  try { return JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}'); }
+  catch { return {}; }
+}
+
+// --- State (defaults merged with any saved settings) ---
+const _saved = loadSettings();
 let state = {
   key: "C",
   scale: "Pentatonic Major",
@@ -23,8 +36,10 @@ let state = {
   octaveMin: 4,
   octaveMax: 5,
   timeSig: "4/4",
-  logicalMode: false,
+  logicalMode: true,
+  metronomeOn: false,
   cadenceType: 'none',
+  ..._saved,
 };
 
 let currentMelody = null;
@@ -62,12 +77,23 @@ document.addEventListener('DOMContentLoaded', () => {
     timeSigSelect.appendChild(opt);
   });
 
-  // Set default selections
+  // Apply state (loaded or default) to all controls before wiring handlers
   keySelect.value = state.key;
   scaleSelect.value = state.scale;
   timeSigSelect.value = state.timeSig;
+  document.getElementById('bpm-range').value = state.bpm;
+  document.getElementById('measure-range').value = state.measureCount;
+  document.getElementById('octave-min').value = state.octaveMin;
+  document.getElementById('octave-max').value = state.octaveMax;
+  document.getElementById('quarter-toggle').checked = state.quarterOn;
+  document.getElementById('eighth-toggle').checked = state.eighthOn;
+  document.getElementById('sixteenth-toggle').checked = state.sixteenthOn;
+  document.getElementById('rests-toggle').checked = state.restsOn;
+  document.getElementById('metronome-toggle').checked = state.metronomeOn;
+  document.getElementById('logical-toggle').checked = state.logicalMode;
+  document.getElementById('cadence-select').value = state.cadenceType;
 
-  // Init sliders
+  // Init sliders (reads current .value to show display label)
   const bpmSlider = initSlider('bpm-range', 'bpm-output');
   const measureSlider = initSlider('measure-range', 'measure-output');
   const octaveMinSlider = initSlider('octave-min', 'octave-min-output');
@@ -97,9 +123,16 @@ document.addEventListener('DOMContentLoaded', () => {
   initToggle('eighth-toggle', (v) => { state.eighthOn = v; });
   initToggle('sixteenth-toggle', (v) => { state.sixteenthOn = v; });
   initToggle('rests-toggle', (v) => { state.restsOn = v; });
-  initToggle('metronome-toggle', (v) => { setMetronome(v); });
+  initToggle('metronome-toggle', (v) => { state.metronomeOn = v; setMetronome(v); });
   initToggle('logical-toggle', (v) => { state.logicalMode = v; });
   document.getElementById('cadence-select').addEventListener('change', (e) => { state.cadenceType = e.target.value; });
+
+  // Apply metronome state now that the audio module is ready
+  setMetronome(state.metronomeOn);
+
+  // Persist settings on any control change
+  document.addEventListener('input', saveSettings);
+  document.addEventListener('change', saveSettings);
 
   // Playback visualization
   onNotePlayed((index) => { highlightNote(index); });
@@ -228,6 +261,7 @@ function handleTapTempo() {
     const slider = document.getElementById('bpm-range');
     slider.value = clamped;
     document.getElementById('bpm-output').textContent = clamped;
+    saveSettings();
   }
 }
 
@@ -256,7 +290,11 @@ function loadFromHistory(entry) {
   document.getElementById('logical-toggle').checked = state.logicalMode ?? false;
   document.getElementById('cadence-select').value = state.cadenceType ?? 'none';
 
+  document.getElementById('metronome-toggle').checked = state.metronomeOn ?? false;
+  setMetronome(state.metronomeOn ?? false);
+
   drawNotes(currentMelody.vexflowNotes, state.measureCount, state.timeSig);
+  saveSettings();
   showToast('Melody loaded from history');
 }
 

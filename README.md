@@ -2,9 +2,13 @@
 
 Random melody generator with sheet music notation and audio playback. Generate melodies in various keys, scales, and time signatures, then play them back or export as MIDI.
 
+Forked from [mwin96/Melodist](https://github.com/mwin96/Melodist).
+
 ## Features
 
-- Generate random melodies in 12 keys and 10 scales (Major, Minor, Dorian, Blues, and more)
+- Generate melodies in 12 keys and 12 scales (all 7 modes of the major scale, plus Natural Minor, Harmonic Minor, Pentatonic Major, Blues, Whole Tone, and Chromatic)
+- Logical Mode — stepwise melody generation with directional momentum and phrase-ending tonic resolution, for more natural-sounding results
+- Intro cadence — optionally plays a II–V–I or IV–V–I chord progression before the melody at the selected key, scale, BPM, and time signature
 - Real-time sheet music rendering with VexFlow
 - Audio playback with piano samples via Tone.js
 - MIDI file export
@@ -13,7 +17,8 @@ Random melody generator with sheet music notation and audio playback. Generate m
 - Configurable note types (quarter, eighth, sixteenth) and rests
 - Adjustable BPM with tap tempo
 - Configurable octave range
-- Melody history with save/load (localStorage)
+- All settings persisted across page refreshes
+- Melody history with save/load
 - Keyboard shortcuts (Space, R, E, Escape)
 
 ## Setup

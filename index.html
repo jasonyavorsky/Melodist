@@ -62,7 +62,7 @@
               <label class="block text-sm font-medium text-slate-600 mb-1.5">
                 BPM: <span id="bpm-output" class="text-indigo-600 font-semibold"></span>
               </label>
-              <input type="range" id="bpm-range" min="1" max="300" value="130" />
+              <input type="range" id="bpm-range" min="1" max="300" value="65" />
               <div class="flex items-center gap-2 mt-2">
                 <button id="btn-tap-tempo" class="text-xs px-3 py-1 rounded-md border border-slate-300 text-slate-600 hover:bg-slate-100 transition-colors">
                   Tap Tempo
@@ -130,7 +130,7 @@
                 <span class="text-sm text-slate-600">Metronome</span>
               </label>
               <label class="toggle-group" title="Generates melodies with stepwise motion and directional flow instead of random leaps">
-                <input type="checkbox" id="logical-toggle" />
+                <input type="checkbox" id="logical-toggle" checked />
                 <span class="toggle-track"><span class="toggle-dot"></span></span>
                 <span class="text-sm text-slate-600">Logical Mode</span>
               </label>
@@ -139,7 +139,7 @@
                 <select id="cadence-select" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
                   <option value="none">None</option>
                   <option value="2-5-1">II–V–I</option>
-                  <option value="1-4-5">I–IV–V</option>
+                  <option value="1-4-5">IV–V–I</option>
                 </select>
               </div>
             </div>
