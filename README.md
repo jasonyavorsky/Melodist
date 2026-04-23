@@ -4,7 +4,7 @@ Random melody generator with sheet music notation and audio playback. Generate m
 
 Forked from [mwin96/Melodist](https://github.com/mwin96/Melodist).
 
-Live preview: https://jasonyavorska.github.io/Melodist/
+Live preview: https://jasonyavorsky.github.io/Melodist/
 
 ## Features
 
