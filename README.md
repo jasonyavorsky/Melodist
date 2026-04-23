@@ -1,6 +1,6 @@
 # Melodist
 
-Random melody generator with sheet music notation and audio playback. Generate melodies in various keys, scales, and time signatures, then play them back or export as MIDI. Can be used for sight reading practice, melody recognitiion, transcription practice, and similar.
+Random melody generator with sheet music notation and audio playback. Generate melodies in various keys, scales, and time signatures, then play them back or export as MIDI. Can be used for sight reading practice, melody recognition, transcription practice, and similar.
 
 Forked from [mwin96/Melodist](https://github.com/mwin96/Melodist).
 
@@ -9,7 +9,7 @@ Live preview: https://jasonyavorsky.github.io/Melodist/
 ## Features
 
 - Generate melodies in 12 keys and 12 scales (all 7 modes of the major scale, plus Natural Minor, Harmonic Minor, Pentatonic Major, Blues, Whole Tone, and Chromatic)
-- Logical Mode — stepwise melody generation with directional momentum and phrase-ending tonic resolution, for more natural-sounding results
+- Progression Mode — generates melodies using diatonic chord progressions (randomly chosen per melody), chord-tone targeting on strong beats, half-cadences at phrase boundaries, tonic resolution at phrase ends, leap recovery, a global melodic arc, and rhythmic motif repetition with variation
 - Intro cadence — optionally plays a II–V–I or IV–V–I chord progression before the melody at the selected key, scale, BPM, and time signature
 - Real-time sheet music rendering with correct key signature and accidentals (VexFlow)
 - Audio playback with piano samples via Tone.js

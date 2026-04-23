@@ -36,7 +36,7 @@ let state = {
   octaveMin: 4,
   octaveMax: 5,
   timeSig: "4/4",
-  logicalMode: true,
+  progressionMode: true,
   metronomeOn: false,
   cadenceType: 'none',
   ..._saved,
@@ -90,7 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('sixteenth-toggle').checked = state.sixteenthOn;
   document.getElementById('rests-toggle').checked = state.restsOn;
   document.getElementById('metronome-toggle').checked = state.metronomeOn;
-  document.getElementById('logical-toggle').checked = state.logicalMode;
+  document.getElementById('progression-toggle').checked = state.progressionMode;
   document.getElementById('cadence-select').value = state.cadenceType;
 
   // Init sliders (reads current .value to show display label)
@@ -124,7 +124,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initToggle('sixteenth-toggle', (v) => { state.sixteenthOn = v; });
   initToggle('rests-toggle', (v) => { state.restsOn = v; });
   initToggle('metronome-toggle', (v) => { state.metronomeOn = v; setMetronome(v); });
-  initToggle('logical-toggle', (v) => { state.logicalMode = v; });
+  initToggle('progression-toggle', (v) => { state.progressionMode = v; });
   document.getElementById('cadence-select').addEventListener('change', (e) => { state.cadenceType = e.target.value; });
 
   // Apply metronome state now that the audio module is ready
@@ -201,7 +201,7 @@ function handleRandomize() {
     octaveMin: state.octaveMin,
     octaveMax: state.octaveMax,
     timeSig: state.timeSig,
-    logical: state.logicalMode,
+    logical: state.progressionMode,
   });
 
   if (!currentMelody) {
@@ -287,7 +287,7 @@ function loadFromHistory(entry) {
   document.getElementById('eighth-toggle').checked = state.eighthOn;
   document.getElementById('sixteenth-toggle').checked = state.sixteenthOn;
   document.getElementById('rests-toggle').checked = state.restsOn;
-  document.getElementById('logical-toggle').checked = state.logicalMode ?? false;
+  document.getElementById('progression-toggle').checked = state.progressionMode ?? true;
   document.getElementById('cadence-select').value = state.cadenceType ?? 'none';
 
   document.getElementById('metronome-toggle').checked = state.metronomeOn ?? false;
