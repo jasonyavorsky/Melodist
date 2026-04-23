@@ -1,6 +1,6 @@
 # Melodist
 
-Random melody generator with sheet music notation and audio playback. Generate melodies in various keys, scales, and time signatures, then play them back or export as MIDI.
+Random melody generator with sheet music notation and audio playback. Generate melodies in various keys, scales, and time signatures, then play them back or export as MIDI. Can be used for sight reading practice, melody recognitiion, transcription practice, and similar.
 
 Forked from [mwin96/Melodist](https://github.com/mwin96/Melodist).
 
