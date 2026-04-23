@@ -293,6 +293,9 @@ function loadFromHistory(entry) {
   document.getElementById('metronome-toggle').checked = state.metronomeOn ?? false;
   setMetronome(state.metronomeOn ?? false);
 
+  const placeholder = document.getElementById('notation-placeholder');
+  if (placeholder) placeholder.style.display = 'none';
+
   drawNotes(currentMelody.vexflowNotes, state.measureCount, state.timeSig, getKeySignature(state.key, state.scale));
   saveSettings();
   showToast('Melody loaded from history');
