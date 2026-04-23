@@ -1,6 +1,7 @@
 import './styles/main.css';
 import { INTERVALS, NOTES, DEFAULTS } from './music-theory.js';
 import { generateMelody } from './melody-generator.js';
+import { buildCadenceChords } from './cadence.js';
 import { playMelody, stopPlayback, onNotePlayed, getIsPlaying, setMetronome } from './audio.js';
 import { initRenderer, drawNotes, highlightNote } from './notation.js';
 import { downloadMidi } from './midi-export.js';
@@ -23,6 +24,7 @@ let state = {
   octaveMax: 5,
   timeSig: "4/4",
   logicalMode: false,
+  cadenceType: 'none',
 };
 
 let currentMelody = null;
@@ -97,6 +99,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initToggle('rests-toggle', (v) => { state.restsOn = v; });
   initToggle('metronome-toggle', (v) => { setMetronome(v); });
   initToggle('logical-toggle', (v) => { state.logicalMode = v; });
+  document.getElementById('cadence-select').addEventListener('change', (e) => { state.cadenceType = e.target.value; });
 
   // Playback visualization
   onNotePlayed((index) => { highlightNote(index); });
@@ -197,8 +200,11 @@ function handlePlay() {
     showToast('Generate a melody first by clicking Randomize');
     return;
   }
-  const bpm = state.timeSig === "6/8" ? 3 : parseInt(state.timeSig.split("/")[0]);
-  playMelody(currentMelody.playNotes, state.bpm, bpm);
+  const beatsPerMeasure = state.timeSig === "6/8" ? 3 : parseInt(state.timeSig.split("/")[0]);
+  const cadenceChords = state.cadenceType !== 'none'
+    ? buildCadenceChords(state.key, state.scale, state.cadenceType)
+    : null;
+  playMelody(currentMelody.playNotes, state.bpm, beatsPerMeasure, cadenceChords);
 }
 
 function handleStop() {
@@ -248,6 +254,7 @@ function loadFromHistory(entry) {
   document.getElementById('sixteenth-toggle').checked = state.sixteenthOn;
   document.getElementById('rests-toggle').checked = state.restsOn;
   document.getElementById('logical-toggle').checked = state.logicalMode ?? false;
+  document.getElementById('cadence-select').value = state.cadenceType ?? 'none';
 
   drawNotes(currentMelody.vexflowNotes, state.measureCount, state.timeSig);
   showToast('Melody loaded from history');

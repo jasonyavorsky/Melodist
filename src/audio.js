@@ -1,4 +1,5 @@
 import * as Tone from 'tone';
+import { convertToMIDINote } from './music-theory.js';
 
 let sampler = null;
 let metronomeClick = null;
@@ -70,8 +71,10 @@ export function onNotePlayed(callback) {
  * Play a melody using Tone.js Transport for precise timing.
  * @param {Array} notes - Array of { note, octave, duration, isRest }
  * @param {number} bpm - Beats per minute
+ * @param {number} beatsPerMeasure
+ * @param {Array|null} cadenceChords - Optional array of 3 chord arrays [{note,octave}[]]
  */
-export async function playMelody(notes, bpm, beatsPerMeasure = 4) {
+export async function playMelody(notes, bpm, beatsPerMeasure = 4, cadenceChords = null) {
   await ensureSampler();
   await Tone.start();
 
@@ -83,24 +86,42 @@ export async function playMelody(notes, bpm, beatsPerMeasure = 4) {
   transport.bpm.value = bpm;
 
   const secPerBeat = 60 / bpm;
+  const measureSec = beatsPerMeasure * secPerBeat;
   let timeOffset = 0;
   scheduledEvents = [];
 
-  // Schedule metronome clicks on each beat
+  // Schedule cadence: two quarter notes then a half note (tonic lingers).
+  // In 3/4 / 6/8 (beatsPerMeasure === 3) use three equal quarter notes instead.
+  if (cadenceChords && cadenceChords.length > 0) {
+    const quarterSec = secPerBeat;
+    const lastIdx = cadenceChords.length - 1;
+    cadenceChords.forEach((chord, ci) => {
+      const chordNotes = chord.map(n => `${convertToMIDINote(n.note)}${n.octave}`);
+      const isLast = ci === lastIdx;
+      const holdSec = (isLast && beatsPerMeasure >= 4) ? quarterSec * 2 : quarterSec;
+      transport.schedule((time) => {
+        if (onNoteCallback) Tone.getDraw().schedule(() => onNoteCallback(-2), time);
+        sampler.triggerAttackRelease(chordNotes, holdSec * 0.92, time);
+      }, timeOffset);
+      timeOffset += holdSec;
+    });
+  }
+
+  // Schedule metronome clicks across full duration (cadence + melody)
   if (metronomeEnabled) {
     ensureMetronome();
-    const totalBeats = notes.reduce((sum, n) => sum + n.duration, 0);
-    const totalSeconds = totalBeats * secPerBeat;
-    for (let beat = 0; beat * secPerBeat < totalSeconds; beat++) {
+    const cadenceSec = timeOffset; // already accumulated above
+    const melodySec = notes.reduce((sum, n) => sum + n.duration, 0) * secPerBeat;
+    const totalSec = cadenceSec + melodySec;
+    for (let beat = 0; beat * secPerBeat < totalSec; beat++) {
       const isDownbeat = beat % beatsPerMeasure === 0;
-      const clickTime = beat * secPerBeat;
       transport.schedule((time) => {
         metronomeClick.triggerAttackRelease(isDownbeat ? 'C5' : 'C4', '32n', time);
-      }, clickTime);
+      }, beat * secPerBeat);
     }
   }
 
-  // Schedule melody notes
+  // Schedule melody notes (timeOffset already accounts for cadence)
   notes.forEach((n, index) => {
     const durationInBeats = n.duration;
     const durationNotation = durationInBeats === 0.25 ? '16n' : durationInBeats === 0.5 ? '8n' : '4n';
