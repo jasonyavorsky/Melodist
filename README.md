@@ -4,6 +4,8 @@ Random melody generator with sheet music notation and audio playback. Generate m
 
 Forked from [mwin96/Melodist](https://github.com/mwin96/Melodist).
 
+**Live demo:** [jasonyavorska.github.io/Melodist](https://jasonyavorska.github.io/Melodist/)
+
 ## Features
 
 - Generate melodies in 12 keys and 12 scales (all 7 modes of the major scale, plus Natural Minor, Harmonic Minor, Pentatonic Major, Blues, Whole Tone, and Chromatic)
