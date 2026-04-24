@@ -38,6 +38,8 @@ let state = {
   timeSig: "4/4",
   progressionMode: true,
   metronomeOn: false,
+  loopMode: false,
+  hideSheet: false,
   cadenceType: 'none',
   ..._saved,
 };
@@ -91,7 +93,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('rests-toggle').checked = state.restsOn;
   document.getElementById('metronome-toggle').checked = state.metronomeOn;
   document.getElementById('progression-toggle').checked = state.progressionMode;
+  document.getElementById('loop-toggle').checked = state.loopMode;
+  document.getElementById('hide-sheet-toggle').checked = state.hideSheet;
   document.getElementById('cadence-select').value = state.cadenceType;
+  applyHideSheet(state.hideSheet);
 
   // Init sliders (reads current .value to show display label)
   const bpmSlider = initSlider('bpm-range', 'bpm-output');
@@ -125,6 +130,8 @@ document.addEventListener('DOMContentLoaded', () => {
   initToggle('rests-toggle', (v) => { state.restsOn = v; });
   initToggle('metronome-toggle', (v) => { state.metronomeOn = v; setMetronome(v); });
   initToggle('progression-toggle', (v) => { state.progressionMode = v; });
+  initToggle('loop-toggle', (v) => { state.loopMode = v; });
+  initToggle('hide-sheet-toggle', (v) => { state.hideSheet = v; applyHideSheet(v); });
   document.getElementById('cadence-select').addEventListener('change', (e) => { state.cadenceType = e.target.value; });
 
   // Apply metronome state now that the audio module is ready
@@ -171,6 +178,11 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // --- Handlers ---
+
+function applyHideSheet(hidden) {
+  const card = document.getElementById('notation-card');
+  if (card) card.style.display = hidden ? 'none' : '';
+}
 
 function handleRandomize() {
   if (!state.key) {
@@ -237,7 +249,7 @@ function handlePlay() {
   const cadenceChords = state.cadenceType !== 'none'
     ? buildCadenceChords(state.key, state.scale, state.cadenceType)
     : null;
-  playMelody(currentMelody.playNotes, state.bpm, beatsPerMeasure, cadenceChords);
+  playMelody(currentMelody.playNotes, state.bpm, beatsPerMeasure, cadenceChords, state.loopMode);
 }
 
 function handleStop() {
@@ -288,10 +300,13 @@ function loadFromHistory(entry) {
   document.getElementById('sixteenth-toggle').checked = state.sixteenthOn;
   document.getElementById('rests-toggle').checked = state.restsOn;
   document.getElementById('progression-toggle').checked = state.progressionMode ?? true;
+  document.getElementById('loop-toggle').checked = state.loopMode ?? false;
+  document.getElementById('hide-sheet-toggle').checked = state.hideSheet ?? false;
   document.getElementById('cadence-select').value = state.cadenceType ?? 'none';
 
   document.getElementById('metronome-toggle').checked = state.metronomeOn ?? false;
   setMetronome(state.metronomeOn ?? false);
+  applyHideSheet(state.hideSheet ?? false);
 
   const placeholder = document.getElementById('notation-placeholder');
   if (placeholder) placeholder.style.display = 'none';

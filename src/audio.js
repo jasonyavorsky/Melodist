@@ -74,7 +74,7 @@ export function onNotePlayed(callback) {
  * @param {number} beatsPerMeasure
  * @param {Array|null} cadenceChords - Optional array of 3 chord arrays [{note,octave}[]]
  */
-export async function playMelody(notes, bpm, beatsPerMeasure = 4, cadenceChords = null) {
+export async function playMelody(notes, bpm, beatsPerMeasure = 4, cadenceChords = null, loop = false) {
   await ensureSampler();
   await Tone.start();
 
@@ -107,10 +107,11 @@ export async function playMelody(notes, bpm, beatsPerMeasure = 4, cadenceChords 
     });
   }
 
+  const cadenceSec = timeOffset; // snapshot after cadence, before melody
+
   // Schedule metronome clicks across full duration (cadence + melody)
   if (metronomeEnabled) {
     ensureMetronome();
-    const cadenceSec = timeOffset; // already accumulated above
     const melodySec = notes.reduce((sum, n) => sum + n.duration, 0) * secPerBeat;
     const totalSec = cadenceSec + melodySec;
     for (let beat = 0; beat * secPerBeat < totalSec; beat++) {
@@ -138,14 +139,20 @@ export async function playMelody(notes, bpm, beatsPerMeasure = 4, cadenceChords 
     timeOffset += durationInBeats * secPerBeat;
   });
 
-  // Schedule end event
-  transport.schedule(() => {
-    Tone.getDraw().schedule(() => {
-      isPlaying = false;
-      if (onNoteCallback) onNoteCallback(-1);
-    });
-    transport.stop();
-  }, timeOffset);
+  if (loop) {
+    transport.loop = true;
+    transport.loopStart = cadenceSec;
+    transport.loopEnd = timeOffset;
+  } else {
+    transport.loop = false;
+    transport.schedule(() => {
+      Tone.getDraw().schedule(() => {
+        isPlaying = false;
+        if (onNoteCallback) onNoteCallback(-1);
+      });
+      transport.stop();
+    }, timeOffset);
+  }
 
   isPlaying = true;
   transport.start();
@@ -155,12 +162,15 @@ export async function playMelody(notes, bpm, beatsPerMeasure = 4, cadenceChords 
  * Stop any current playback.
  */
 export function stopPlayback() {
-  Tone.getTransport().stop();
-  Tone.getTransport().cancel();
+  const t = Tone.getTransport();
+  t.stop();
+  t.cancel();
+  t.loop = false;
   scheduledEvents = [];
   isPlaying = false;
   if (onNoteCallback) onNoteCallback(-1);
 }
+
 
 /**
  * Returns whether audio is currently playing.

@@ -19,6 +19,8 @@ Live preview: https://jasonyavorsky.github.io/Melodist/
 - Configurable note types (quarter, eighth, sixteenth) and rests
 - Adjustable BPM with tap tempo
 - Configurable octave range
+- Loop mode — repeats the melody indefinitely (cadence plays once at the start)
+- Hide Sheet Music — hides notation for transcription or ear training practice
 - All settings persisted across page refreshes
 - Melody history with save/load
 - Keyboard shortcuts (Space, R, E, Escape)

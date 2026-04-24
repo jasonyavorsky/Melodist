@@ -134,6 +134,16 @@
                 <span class="toggle-track"><span class="toggle-dot"></span></span>
                 <span class="text-sm text-slate-600">Progression Mode</span>
               </label>
+              <label class="toggle-group" title="Repeat the melody indefinitely (cadence plays once at the start)">
+                <input type="checkbox" id="loop-toggle" />
+                <span class="toggle-track"><span class="toggle-dot"></span></span>
+                <span class="text-sm text-slate-600">Loop</span>
+              </label>
+              <label class="toggle-group" title="Hide sheet music for transcription or ear training practice">
+                <input type="checkbox" id="hide-sheet-toggle" />
+                <span class="toggle-track"><span class="toggle-dot"></span></span>
+                <span class="text-sm text-slate-600">Hide Sheet Music</span>
+              </label>
               <div class="flex items-center gap-2">
                 <label for="cadence-select" class="text-sm text-slate-600 whitespace-nowrap">Intro cadence</label>
                 <select id="cadence-select" class="rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
@@ -167,7 +177,7 @@
         </div>
 
         <!-- Notation Display -->
-        <div class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
+        <div id="notation-card" class="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
           <h2 class="text-sm font-medium text-slate-500 mb-4">Sheet Music</h2>
           <div id="notation-container" class="overflow-x-auto min-h-[200px] flex items-center justify-center">
             <p id="notation-placeholder" class="text-slate-300 text-sm italic">Select a key and scale, then click Randomize</p>
