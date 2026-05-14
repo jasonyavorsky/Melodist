@@ -1,19 +1,26 @@
 import {
+  NOTES,
   generateKeyboard,
   filterKeyboard,
   getNoteLengths,
   convertToMIDINote,
   durationToMIDI,
   getBeatsPerMeasure,
+  getKeySignature,
+  respellNote,
 } from './music-theory.js';
 
 // Chord progressions as scale-degree indices (0=I, 1=ii, 2=iii, 3=IV, 4=V, 5=vi, 6=vii°)
 const PROGRESSIONS_7 = [
-  [0, 4, 0, 4],   // I  V  I  V
-  [0, 3, 4, 0],   // I  IV V  I
-  [0, 5, 3, 4],   // I  vi IV V
-  [0, 1, 4, 0],   // I  ii V  I
-  [0, 3, 0, 4],   // I  IV I  V
+  [0, 4, 0, 4],   // I   V   I   V
+  [0, 3, 4, 0],   // I   IV  V   I
+  [0, 5, 3, 4],   // I   vi  IV  V
+  [0, 1, 4, 0],   // I   ii  V   I
+  [0, 3, 0, 4],   // I   IV  I   V
+  [0, 5, 1, 4],   // I   vi  ii  V
+  [5, 3, 0, 4],   // vi  IV  I   V  (axis progression)
+  [0, 5, 3, 0],   // I   vi  IV  I
+  [1, 4, 5, 3],   // ii  V   vi  IV
 ];
 
 const PROGRESSIONS_5 = [
@@ -27,6 +34,29 @@ function getChordTones(degree, scaleLength) {
     degree % scaleLength,
     (degree + 2) % scaleLength,
     (degree + 4) % scaleLength,
+  ];
+}
+
+function getChordQuality(root, third, fifth) {
+  const i3 = ((NOTES.indexOf(third) - NOTES.indexOf(root)) + 12) % 12;
+  const i5 = ((NOTES.indexOf(fifth) - NOTES.indexOf(root)) + 12) % 12;
+  if (i3 === 3 && i5 === 7) return 'm';
+  if (i3 === 3 && i5 === 6) return '°';
+  if (i3 === 4 && i5 === 8) return '+';
+  return ''; // major (or unclassified for unusual scales)
+}
+
+function buildChordVoicing(rootNote, thirdNote, fifthNote, rootOctave = 3) {
+  const rs = NOTES.indexOf(rootNote);
+  const ts = NOTES.indexOf(thirdNote);
+  const fs = NOTES.indexOf(fifthNote);
+  const thirdOctave = ts > rs ? rootOctave : rootOctave + 1;
+  const thirdAbs = thirdOctave * 12 + ts;
+  const fifthOctave = (thirdOctave * 12 + fs) > thirdAbs ? thirdOctave : thirdOctave + 1;
+  return [
+    { note: rootNote, octave: rootOctave },
+    { note: thirdNote, octave: thirdOctave },
+    { note: fifthNote, octave: fifthOctave },
   ];
 }
 
@@ -171,6 +201,23 @@ export function generateMelody({
     progression = PROGRESSIONS_5[Math.floor(Math.random() * PROGRESSIONS_5.length)];
   }
 
+  // Build per-measure chord map (name + voicing for display and playback)
+  const chordMap = [];
+  if (logical && progression) {
+    const keySig = getKeySignature(key, scale);
+    for (let m = 0; m < measureCount; m++) {
+      const degree = progression[m % progression.length];
+      const rootNote = filteredKeyboard[degree % scaleLength].note;
+      const thirdNote = filteredKeyboard[(degree + 2) % scaleLength].note;
+      const fifthNote = filteredKeyboard[(degree + 4) % scaleLength].note;
+      const quality = getChordQuality(rootNote, thirdNote, fifthNote);
+      chordMap.push({
+        chordName: respellNote(rootNote, keySig) + quality,
+        chordTones: buildChordVoicing(rootNote, thirdNote, fifthNote, 3),
+      });
+    }
+  }
+
   // Pre-compute total note estimate for melodic arc
   const avgDuration = noteLengths.reduce((a, b) => a + b, 0) / noteLengths.length;
   const totalNotesEstimate = Math.max(1, Math.round(
@@ -289,5 +336,5 @@ export function generateMelody({
     }
   }
 
-  return { playNotes, vexflowNotes, midiNotes };
+  return { playNotes, vexflowNotes, midiNotes, chordMap: chordMap.length > 0 ? chordMap : null };
 }

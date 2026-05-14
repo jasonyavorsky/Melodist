@@ -158,6 +158,13 @@ export function getKeySignature(key, scale) {
   return MAJOR_KEY_NAMES[parentIndex];
 }
 
+const SHARP_TO_FLAT_UPPER = { 'C#': 'Db', 'D#': 'Eb', 'F#': 'Gb', 'G#': 'Ab', 'A#': 'Bb' };
+const FLAT_KEYS = new Set(['F', 'Bb', 'Eb', 'Ab', 'Db', 'Gb', 'Cb']);
+
+export function respellNote(note, keySig) {
+  return FLAT_KEYS.has(keySig) ? (SHARP_TO_FLAT_UPPER[note] ?? note) : note;
+}
+
 /**
  * Get the number of beats in a measure for the given time signature.
  */

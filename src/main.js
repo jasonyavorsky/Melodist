@@ -39,6 +39,7 @@ let state = {
   progressionMode: true,
   metronomeOn: false,
   loopMode: false,
+  muteNotes: false,
   hideSheet: false,
   cadenceType: 'none',
   ..._saved,
@@ -93,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('rests-toggle').checked = state.restsOn;
   document.getElementById('metronome-toggle').checked = state.metronomeOn;
   document.getElementById('progression-toggle').checked = state.progressionMode;
+  document.getElementById('mute-notes-toggle').checked = state.muteNotes;
   document.getElementById('loop-toggle').checked = state.loopMode;
   document.getElementById('hide-sheet-toggle').checked = state.hideSheet;
   document.getElementById('cadence-select').value = state.cadenceType;
@@ -130,6 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initToggle('rests-toggle', (v) => { state.restsOn = v; });
   initToggle('metronome-toggle', (v) => { state.metronomeOn = v; setMetronome(v); });
   initToggle('progression-toggle', (v) => { state.progressionMode = v; });
+  initToggle('mute-notes-toggle', (v) => { state.muteNotes = v; });
   initToggle('loop-toggle', (v) => { state.loopMode = v; });
   initToggle('hide-sheet-toggle', (v) => { state.hideSheet = v; applyHideSheet(v); });
   document.getElementById('cadence-select').addEventListener('change', (e) => { state.cadenceType = e.target.value; });
@@ -225,7 +228,7 @@ function handleRandomize() {
   const placeholder = document.getElementById('notation-placeholder');
   if (placeholder) placeholder.style.display = 'none';
 
-  drawNotes(currentMelody.vexflowNotes, state.measureCount, state.timeSig, getKeySignature(state.key, state.scale));
+  drawNotes(currentMelody.vexflowNotes, state.measureCount, state.timeSig, getKeySignature(state.key, state.scale), currentMelody.chordMap);
 
   // Save to history
   saveToHistory({
@@ -249,7 +252,7 @@ function handlePlay() {
   const cadenceChords = state.cadenceType !== 'none'
     ? buildCadenceChords(state.key, state.scale, state.cadenceType)
     : null;
-  playMelody(currentMelody.playNotes, state.bpm, beatsPerMeasure, cadenceChords, state.loopMode);
+  playMelody(currentMelody.playNotes, state.bpm, beatsPerMeasure, cadenceChords, state.loopMode, currentMelody.chordMap, state.muteNotes);
 }
 
 function handleStop() {
@@ -300,6 +303,7 @@ function loadFromHistory(entry) {
   document.getElementById('sixteenth-toggle').checked = state.sixteenthOn;
   document.getElementById('rests-toggle').checked = state.restsOn;
   document.getElementById('progression-toggle').checked = state.progressionMode ?? true;
+  document.getElementById('mute-notes-toggle').checked = state.muteNotes ?? false;
   document.getElementById('loop-toggle').checked = state.loopMode ?? false;
   document.getElementById('hide-sheet-toggle').checked = state.hideSheet ?? false;
   document.getElementById('cadence-select').value = state.cadenceType ?? 'none';
@@ -311,7 +315,7 @@ function loadFromHistory(entry) {
   const placeholder = document.getElementById('notation-placeholder');
   if (placeholder) placeholder.style.display = 'none';
 
-  drawNotes(currentMelody.vexflowNotes, state.measureCount, state.timeSig, getKeySignature(state.key, state.scale));
+  drawNotes(currentMelody.vexflowNotes, state.measureCount, state.timeSig, getKeySignature(state.key, state.scale), currentMelody.chordMap);
   saveSettings();
   showToast('Melody loaded from history');
 }

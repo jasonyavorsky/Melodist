@@ -8,18 +8,20 @@ Live preview: https://jasonyavorsky.github.io/Melodist/
 
 ## Features
 
-- Generate melodies in 12 keys and 12 scales (all 7 modes of the major scale, plus Natural Minor, Harmonic Minor, Pentatonic Major, Blues, Whole Tone, and Chromatic)
-- Progression Mode — generates melodies using diatonic chord progressions (randomly chosen per melody), chord-tone targeting on strong beats, half-cadences at phrase boundaries, tonic resolution at phrase ends, leap recovery, a global melodic arc, and rhythmic motif repetition with variation
+- Generate melodies in 12 keys and 12 scales: the 7 diatonic modes (Major, Dorian, Phrygian, Lydian, Mixolydian, Natural Minor, Locrian), plus Harmonic Minor, Pentatonic Major, Blues, Whole Tone, and Chromatic
+- Progression Mode — generates structured melodies using randomly chosen diatonic chord progressions with chord-tone targeting, phrase cadences, leap recovery, a global melodic arc, and rhythmic motif repetition; chord names are shown above each measure in the sheet music and the chord is played quietly at the start of each measure
 - Intro cadence — optionally plays a II–V–I or IV–V–I chord progression before the melody at the selected key, scale, BPM, and time signature
 - Real-time sheet music rendering with correct key signature and accidentals (VexFlow)
-- Audio playback with piano samples via Tone.js
+- Audio playback with piano samples (Tone.js)
 - MIDI file export
 - Playback visualization (highlights current note)
 - Multiple time signatures (4/4, 3/4, 6/8)
 - Configurable note types (quarter, eighth, sixteenth) and rests
 - Adjustable BPM with tap tempo
-- Configurable octave range
+- Configurable octave range and number of measures
+- Metronome
 - Loop mode — repeats the melody indefinitely (cadence plays once at the start)
+- Mute Notes — silences melody notes while chords and metronome continue playing, useful for ear training
 - Hide Sheet Music — hides notation for transcription or ear training practice
 - All settings persisted across page refreshes
 - Melody history with save/load

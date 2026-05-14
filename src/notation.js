@@ -7,8 +7,8 @@ let noteElements = []; // Store SVG elements for playback highlighting
 
 const STAVE_WIDTH = 420;
 const STAVE_X_START = 10;
-const STAVE_Y_START = 40;
-const LINE_HEIGHT = 105;
+const STAVE_Y_START = 70;
+const LINE_HEIGHT = 140;
 const MEASURES_PER_LINE = 2;
 
 // Sharp count for each major key name (negative = flats).
@@ -47,7 +47,7 @@ function resizeCanvas(measureCount) {
  * @param {string} timeSig - e.g. "4/4"
  * @param {string} keySig  - VexFlow major key name, e.g. "G", "Bb". Defaults to "C".
  */
-export function drawNotes(notes, measureCount, timeSig = "4/4", keySig = "C") {
+export function drawNotes(notes, measureCount, timeSig = "4/4", keySig = "C", chordMap = null) {
   if (!renderer) return [];
 
   resizeCanvas(measureCount);
@@ -144,6 +144,24 @@ export function drawNotes(notes, measureCount, timeSig = "4/4", keySig = "C") {
         noteIndex: globalNoteIndex++,
       });
     });
+
+    // Draw chord label above stave for progression mode
+    if (chordMap && chordMap[measureIndex]) {
+      const svgEl = context.svg;
+      if (svgEl) {
+        const labelX = measureIndex === 0 ? x + 130 : x + 65;
+        const labelY = y - 28;
+        const textEl = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        textEl.setAttribute('x', String(labelX));
+        textEl.setAttribute('y', String(labelY));
+        textEl.setAttribute('font-family', 'Arial');
+        textEl.setAttribute('font-size', '12');
+        textEl.setAttribute('font-weight', 'bold');
+        textEl.setAttribute('fill', '#6366f1');
+        textEl.textContent = chordMap[measureIndex].chordName;
+        svgEl.appendChild(textEl);
+      }
+    }
   });
 
   return noteElements;

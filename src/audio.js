@@ -74,7 +74,7 @@ export function onNotePlayed(callback) {
  * @param {number} beatsPerMeasure
  * @param {Array|null} cadenceChords - Optional array of 3 chord arrays [{note,octave}[]]
  */
-export async function playMelody(notes, bpm, beatsPerMeasure = 4, cadenceChords = null, loop = false) {
+export async function playMelody(notes, bpm, beatsPerMeasure = 4, cadenceChords = null, loop = false, chordMap = null, muteNotes = false) {
   await ensureSampler();
   await Tone.start();
 
@@ -83,6 +83,7 @@ export async function playMelody(notes, bpm, beatsPerMeasure = 4, cadenceChords 
   const transport = Tone.getTransport();
   transport.cancel();
   transport.position = 0;
+  transport.loop = false;
   transport.bpm.value = bpm;
 
   const secPerBeat = 60 / bpm;
@@ -90,8 +91,7 @@ export async function playMelody(notes, bpm, beatsPerMeasure = 4, cadenceChords 
   let timeOffset = 0;
   scheduledEvents = [];
 
-  // Schedule cadence: two quarter notes then a half note (tonic lingers).
-  // In 3/4 / 6/8 (beatsPerMeasure === 3) use three equal quarter notes instead.
+  // Schedule cadence once (before any loop iterations).
   if (cadenceChords && cadenceChords.length > 0) {
     const quarterSec = secPerBeat;
     const lastIdx = cadenceChords.length - 1;
@@ -107,51 +107,72 @@ export async function playMelody(notes, bpm, beatsPerMeasure = 4, cadenceChords 
     });
   }
 
-  const cadenceSec = timeOffset; // snapshot after cadence, before melody
+  const cadenceSec = timeOffset;
+  const melodyDuration = notes.reduce((sum, n) => sum + n.duration, 0) * secPerBeat;
 
-  // Schedule metronome clicks across full duration (cadence + melody)
-  if (metronomeEnabled) {
-    ensureMetronome();
-    const melodySec = notes.reduce((sum, n) => sum + n.duration, 0) * secPerBeat;
-    const totalSec = cadenceSec + melodySec;
-    for (let beat = 0; beat * secPerBeat < totalSec; beat++) {
-      const isDownbeat = beat % beatsPerMeasure === 0;
-      transport.schedule((time) => {
-        metronomeClick.triggerAttackRelease(isDownbeat ? 'C5' : 'C4', '32n', time);
-      }, beat * secPerBeat);
+  // Pre-schedule all iterations explicitly rather than using transport.loop.
+  // This avoids a Tone.js v15 boundary issue where events scheduled at exactly
+  // loopStart are dropped on the second and subsequent iterations.
+  const numIterations = loop
+    ? Math.ceil((30 * 60) / Math.max(melodyDuration, 0.1))
+    : 1;
+
+  for (let iter = 0; iter < numIterations; iter++) {
+    const iterStart = cadenceSec + iter * melodyDuration;
+
+    // Metronome clicks for this iteration
+    if (metronomeEnabled) {
+      ensureMetronome();
+      for (let beat = 0; beat * secPerBeat < melodyDuration; beat++) {
+        const isDownbeat = beat % beatsPerMeasure === 0;
+        transport.schedule((time) => {
+          metronomeClick.triggerAttackRelease(isDownbeat ? 'C5' : 'C4', '32n', time);
+        }, iterStart + beat * secPerBeat);
+      }
     }
+
+    // Per-measure chord notes for this iteration
+    if (chordMap && chordMap.length > 0) {
+      chordMap.forEach((chord, m) => {
+        const t = iterStart + m * measureSec;
+        transport.schedule((time) => {
+          chord.chordTones.forEach(({ note, octave }) => {
+            sampler.triggerAttackRelease(
+              `${convertToMIDINote(note)}${octave}`,
+              secPerBeat * 1.8,
+              time,
+              0.35,
+            );
+          });
+        }, t);
+      });
+    }
+
+    // Melody notes for this iteration
+    let melodyOffset = iterStart;
+    notes.forEach((n, index) => {
+      const durationInBeats = n.duration;
+      const durationNotation = durationInBeats === 0.25 ? '16n' : durationInBeats === 0.5 ? '8n' : '4n';
+      transport.schedule((time) => {
+        if (onNoteCallback) {
+          Tone.getDraw().schedule(() => onNoteCallback(index), time);
+        }
+        if (!muteNotes && !n.isRest && n.note && n.octave) {
+          sampler.triggerAttackRelease(`${n.note}${n.octave}`, durationNotation, time);
+        }
+      }, melodyOffset);
+      melodyOffset += durationInBeats * secPerBeat;
+    });
   }
 
-  // Schedule melody notes (timeOffset already accounts for cadence)
-  notes.forEach((n, index) => {
-    const durationInBeats = n.duration;
-    const durationNotation = durationInBeats === 0.25 ? '16n' : durationInBeats === 0.5 ? '8n' : '4n';
-
-    transport.schedule((time) => {
-      if (onNoteCallback) {
-        Tone.getDraw().schedule(() => onNoteCallback(index), time);
-      }
-      if (!n.isRest && n.note && n.octave) {
-        sampler.triggerAttackRelease(`${n.note}${n.octave}`, durationNotation, time);
-      }
-    }, timeOffset);
-
-    timeOffset += durationInBeats * secPerBeat;
-  });
-
-  if (loop) {
-    transport.loop = true;
-    transport.loopStart = cadenceSec;
-    transport.loopEnd = timeOffset;
-  } else {
-    transport.loop = false;
+  if (!loop) {
     transport.schedule(() => {
       Tone.getDraw().schedule(() => {
         isPlaying = false;
         if (onNoteCallback) onNoteCallback(-1);
       });
       transport.stop();
-    }, timeOffset);
+    }, cadenceSec + melodyDuration);
   }
 
   isPlaying = true;
